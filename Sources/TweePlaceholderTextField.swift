@@ -17,6 +17,8 @@ open class TweePlaceholderTextField: UITextField {
 		case smoothly
 	}
 
+	// Public
+
 	/// Default is `immediately`.
 	public var minimizationAnimationType: MinimizationAnimationType = .immediately
 	/// Minimum font size for the custom placeholder.
@@ -68,52 +70,28 @@ open class TweePlaceholderTextField: UITextField {
 		}
 	}
 
-	/// The technique to use for aligning the text.
-	open override var textAlignment: NSTextAlignment {
-		didSet {
-			placeholderLabel.textAlignment = textAlignment
-		}
-	}
-
-	/// The font used to display the text.
-	open override var font: UIFont? {
-		didSet {
-			configurePlaceholderFont()
-		}
-	}
+	// Private
 
 	private var minimizeFontAnimation: FontAnimation!
+
 	private var maximizeFontAnimation: FontAnimation!
+
 	private var bottomConstraint: NSLayoutConstraint?
 
 	// MARK: Methods
 
-	public override init(frame: CGRect) {
-		super.init(frame: frame)
-		initializeSetup()
+	/// Prepares the receiver for service after it has been loaded from an Interface Builder archive, or nib file.
+	override open func awakeFromNib() {
+		super.awakeFromNib()
+		initializeTextField()
 	}
 
-	public required init?(coder aDecoder: NSCoder) {
-		super.init(coder: aDecoder)
-		initializeSetup()
-	}
-
-	private func initializeSetup() {
+	private func initializeTextField() {
 		observe()
 
 		minimizeFontAnimation = FontAnimation(target: self, selector: #selector(minimizePlaceholderFontSize))
 		maximizeFontAnimation = FontAnimation(target: self, selector: #selector(maximizePlaceholderFontSize))
 
-		configurePlaceholderLabel()
-	}
-
-	// Need to investigate and make code better.
-	private func configurePlaceholderLabel() {
-		placeholderLabel.textAlignment = textAlignment
-		configurePlaceholderFont()
-	}
-
-	private func configurePlaceholderFont() {
 		placeholderLabel.font = font ?? placeholderLabel.font
 		placeholderLabel.font = placeholderLabel.font.withSize(originalPlaceholderFontSize)
 	}
@@ -227,7 +205,8 @@ open class TweePlaceholderTextField: UITextField {
 		placeholderLabel.translatesAutoresizingMaskIntoConstraints = false
 
 		placeholderLabel.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
-		placeholderLabel.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+		// MARK: my changes!
+        placeholderLabel.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
 		bottomConstraint = placeholderLabel.bottomAnchor.constraint(equalTo: bottomAnchor)
 		bottomConstraint?.isActive = true
 
