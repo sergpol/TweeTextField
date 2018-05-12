@@ -8,15 +8,14 @@ import UIKit
 open class TweePlaceholderTextField: UITextField {
 
 	/// Animation type when a user begins editing.
-	/// - immediately: Sets minimum font size immediately when a user begins editing.
-	/// - smoothly: Sets minimum font size step by step during animation transition when a user begins editing.
 	public enum MinimizationAnimationType {
+		/** Sets minimum font size immediately when a user begins editing. */
 		case immediately
+
 		// Has some performance issue on first launch. Need to investigate how to fix.
+		/** Sets minimum font size step by step during animation transition when a user begins editing */
 		case smoothly
 	}
-
-	// Public
 
 	/// Default is `immediately`.
 	public var minimizationAnimationType: MinimizationAnimationType = .immediately
@@ -55,39 +54,66 @@ open class TweePlaceholderTextField: UITextField {
 	/// Custom placeholder label. You can use it to style placeholder text.
 	public private(set) lazy var placeholderLabel = UILabel()
 
+	///	The current text that is displayed by the label.
 	open override var text: String? {
 		didSet {
 			setCorrectPlaceholderSize()
 		}
 	}
 
+	/// The styled text displayed by the text field.
 	open override var attributedText: NSAttributedString? {
 		didSet {
 			setCorrectPlaceholderSize()
 		}
 	}
 
-	// Private
+	/// The technique to use for aligning the text.
+	open override var textAlignment: NSTextAlignment {
+		didSet {
+			placeholderLabel.textAlignment = textAlignment
+		}
+	}
+
+	/// The font used to display the text.
+	open override var font: UIFont? {
+		didSet {
+			configurePlaceholderFont()
+		}
+	}
 
 	private var minimizeFontAnimation: FontAnimation!
-
 	private var maximizeFontAnimation: FontAnimation!
-
 	private var bottomConstraint: NSLayoutConstraint?
 
 	// MARK: Methods
 
-	override open func awakeFromNib() {
-		super.awakeFromNib()
-		initializeTextField()
+	public override init(frame: CGRect) {
+		super.init(frame: frame)
+		initializeSetup()
 	}
 
-	private func initializeTextField() {
+	public required init?(coder aDecoder: NSCoder) {
+		super.init(coder: aDecoder)
+		initializeSetup()
+	}
+
+	private func initializeSetup() {
 		observe()
 
 		minimizeFontAnimation = FontAnimation(target: self, selector: #selector(minimizePlaceholderFontSize))
 		maximizeFontAnimation = FontAnimation(target: self, selector: #selector(maximizePlaceholderFontSize))
 
+		configurePlaceholderLabel()
+	}
+
+	// Need to investigate and make code better.
+	private func configurePlaceholderLabel() {
+		placeholderLabel.textAlignment = textAlignment
+		configurePlaceholderFont()
+	}
+
+	private func configurePlaceholderFont() {
 		placeholderLabel.font = font ?? placeholderLabel.font
 		placeholderLabel.font = placeholderLabel.font.withSize(originalPlaceholderFontSize)
 	}
@@ -201,7 +227,6 @@ open class TweePlaceholderTextField: UITextField {
 		placeholderLabel.translatesAutoresizingMaskIntoConstraints = false
 
 		placeholderLabel.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
-        // MARK: my changes!
 		placeholderLabel.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
 		bottomConstraint = placeholderLabel.bottomAnchor.constraint(equalTo: bottomAnchor)
 		bottomConstraint?.isActive = true
